@@ -24,6 +24,7 @@ function App() {
         const data = response.data
         setCountryData(data)
         setIsLoading(false)
+        console.log("data fetched");
       })
     } catch (error) {
       console.log(error);
