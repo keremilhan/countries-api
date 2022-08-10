@@ -31,6 +31,16 @@ function App() {
     }
   }
 
+  const turkishToLower = (string) =>{
+	let letters = { 
+    "İ": "i", 
+    "I": "i",
+    "ı": "i"
+   };
+	string = string.replace(/(([İIı]))/g, function(letter){ return letters[letter]; })
+	return string.toLowerCase(); 
+  }
+
   useEffect(() => {
     getData();
   }, [])
@@ -38,18 +48,18 @@ function App() {
   // HANDLE INPUT CHANGES //
   
   const handleCapitalChange = (e) => {
-    setCapitalInput(e.target.value.toLowerCase())
+    setCapitalInput(turkishToLower(e.target.value))
   } 
 
   const handleGeneralChange = (e) => {
-    setGeneralInput(e.target.value.toLowerCase())
+    setGeneralInput(turkishToLower(e.target.value))
   }
 
   // FILTERING FUNCTION //
   const search = (countryData) => {
-    return countryData.filter((country)=> country.capital?.toLowerCase()?.includes(capitalInput)).filter((country)=> keys.some(key => country[key].toLowerCase().includes(generalInput)))
+    return countryData.filter((country)=> turkishToLower(country.capital ? country.capital : "")?.includes(capitalInput)).filter((country)=> keys.some(key => turkishToLower(country[key] ? country[key]: "").includes(generalInput)))
   }
-  
+
   return (
     <div className='bg-secondary min-vh-100'>
       <div className='container pb-1'>
