@@ -66,6 +66,7 @@ function App() {
 
   useEffect(() => {
     getData();
+    // eslint-disable-next-line
   }, [])
 
   // HANDLE INPUT CHANGES //
