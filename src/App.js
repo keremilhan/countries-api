@@ -13,8 +13,7 @@ function App() {
   const [capitalInput, setCapitalInput] = useState("")
   const [generalInput, setGeneralInput] = useState("")
   const [isLoading, setIsLoading] = useState(true)
-
-  const keys = ["name", "capital", "region"]
+  const [countriesDataValues] = useState([])
 
   // FETCHING DATA FROM API BY USING AXIOS //
   const getData = async () => {
@@ -23,6 +22,15 @@ function App() {
       .then((response)=>{
         const data = response.data
         setCountryData(data)
+
+        for (let country of data) {
+          collectValues(country, true);  
+          countriesDataValues.push({
+            countryName: country.name,
+            values: JSON.parse(JSON.stringify(countryValues))
+          })
+        }
+
         setIsLoading(false)
         console.log("data fetched");
       })
@@ -31,6 +39,21 @@ function App() {
     }
   }
 
+  let countryValues = []
+  function collectValues(obj, isFirst) {
+    if(isFirst){
+      countryValues = []
+    }
+    for (var key in obj) {
+        if (typeof obj[key] === "object") {
+          collectValues(obj[key], false);   
+        } else {
+            countryValues.push(obj[key]);    
+        }
+    }
+  }
+
+  
   const turkishToLower = (string) =>{
 	let letters = { 
     "İ": "i", 
@@ -48,16 +71,46 @@ function App() {
   // HANDLE INPUT CHANGES //
   
   const handleCapitalChange = (e) => {
-    setCapitalInput(turkishToLower(e.target.value))
+    clearTimeout()
+    // Bu metodda debouncer mekanizması kullanarak kullanıcının filtre inputunun tamamını girmesini bekleyerek her harfte search algoritmasını çalıştırmıyoruz. Bu şekilde kodumuz daha optimize bir şekilde çalışıyor.
+    setTimeout(() => {
+      setCapitalInput(turkishToLower(e.target.value).trim())
+    }, 500);
+
   } 
 
   const handleGeneralChange = (e) => {
-    setGeneralInput(turkishToLower(e.target.value))
+    clearTimeout()
+    // Bu metodda debouncer mekanizması kullanarak kullanıcının filtre inputunun tamamını girmesini bekleyerek her harfte search algoritmasını çalıştırmıyoruz. Bu şekilde kodumuz daha optimize bir şekilde çalışıyor.
+    setTimeout(() => {
+      setGeneralInput(
+        turkishToLower(e.target.value).trim()
+      )
+    }, 500);
+  }
+
+  function isExist(countryValues){
+    for(let value of countryValues){
+      if(turkishToLower(value.toString()).includes(generalInput)){
+        return true
+      }
+    }
+    return false
   }
 
   // FILTERING FUNCTION //
   const search = (countryData) => {
-    return countryData.filter((country)=> turkishToLower(country.capital ? country.capital : "")?.includes(capitalInput)).filter((country)=> keys.some(key => turkishToLower(country[key] ? country[key]: "").includes(generalInput)))
+
+    if(capitalInput){
+      countryData = countryData.filter((el)=> turkishToLower(el.capital ? el.capital : "")?.includes(capitalInput))
+    }
+
+    if(generalInput){
+      let filteredCountryNames = countriesDataValues.filter(c => isExist(c.values)).map(c => c.countryName)
+      countryData =  countryData.filter((el)=> filteredCountryNames.includes(el.name))
+    }
+
+    return countryData
   }
 
   return (
